@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface RssService {
 
-    public Mono<String> getFeed();
+    public Mono<List<FeedItem>> getFeed();
 }

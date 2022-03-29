@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 public class FeedController {
 
@@ -17,7 +19,7 @@ public class FeedController {
     @GetMapping(
             value = "/",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<String> index() {
+    public Mono<List<FeedItem>> index() {
         return rssService.getFeed();
     }
 }
