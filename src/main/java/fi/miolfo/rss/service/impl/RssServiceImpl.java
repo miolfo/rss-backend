@@ -3,11 +3,13 @@ package fi.miolfo.rss.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import fi.miolfo.rss.mapper.RssToFeedItemMapper;
 import fi.miolfo.rss.model.FeedItem;
 import fi.miolfo.rss.model.xml.RssRoot;
 import fi.miolfo.rss.service.RssService;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,11 +20,15 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class RssServiceImpl implements RssService {
 
     private static final String HS_XML = "https://www.hs.fi/rss/tuoreimmat.xml";
+
+    @Autowired
+    private RssToFeedItemMapper rssToFeedItemMapper;
 
     @Override
     public Mono<List<FeedItem>> getFeed() {
@@ -45,11 +51,10 @@ public class RssServiceImpl implements RssService {
         try {
             xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             RssRoot root = xmlMapper.readValue(xml, RssRoot.class);
-            int x = 3;
+            return root.getChannel().getItems().stream().map(it -> rssToFeedItemMapper.itemToFeedItem(it)).collect(Collectors.toList());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
+            return new ArrayList<>();
         }
-
-        return new ArrayList<>();
     }
 }

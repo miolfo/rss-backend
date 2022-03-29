@@ -23,6 +23,7 @@ public class RssRoot {
     public static class Channel {
         private String title;
         private String link;
+
         @JacksonXmlProperty(localName = "item")
         @JacksonXmlCData
         @JacksonXmlElementWrapper(useWrapping = false)
