@@ -15,8 +15,5 @@ DELETE /api/v1/feed/:feedId - delete feed
 
 GET /api/v1/feed/:feedId/items - get feed items
 
-POST /api/v1/feed/:feedId - add rss to feed  
-
-
 
 

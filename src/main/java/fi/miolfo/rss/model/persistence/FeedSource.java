@@ -1,16 +1,16 @@
 package fi.miolfo.rss.model.persistence;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table
 @Getter
 @Setter
-public class Feed {
+public class FeedSource {
 
     @Id
     @Column
@@ -20,6 +20,11 @@ public class Feed {
     @Column
     private String name;
 
-    @OneToMany(mappedBy = "feed")
-    private List<FeedSource> feedSources;
+    @Column
+    private String source;
+
+    @ManyToOne
+    @JoinColumn(name="feed_id")
+    @JsonIgnore
+    private Feed feed;
 }
