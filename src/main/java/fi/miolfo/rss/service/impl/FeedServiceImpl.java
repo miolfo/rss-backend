@@ -6,6 +6,9 @@ import fi.miolfo.rss.service.FeedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class FeedServiceImpl implements FeedService {
 
@@ -13,7 +16,22 @@ public class FeedServiceImpl implements FeedService {
     private FeedRepository feedRepository;
 
     @Override
-    public Feed createFeed(Feed feed) {
+    public Optional<Feed> getFeed(int id) {
+        return feedRepository.findById(id);
+    }
+
+    @Override
+    public List<Feed> getFeeds() {
+        return (List<Feed>) feedRepository.findAll();
+    }
+
+    @Override
+    public void deleteFeed(Feed feed) {
+        feedRepository.delete(feed);
+    }
+
+    @Override
+    public Feed save(Feed feed) {
         return feedRepository.save(feed);
     }
 }
