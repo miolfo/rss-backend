@@ -1,5 +1,6 @@
 package fi.miolfo.rss.model.persistence;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,5 +22,6 @@ public class Feed {
     private String name;
 
     @OneToMany(mappedBy = "feed")
+    @JsonIgnore
     private List<FeedSource> feedSources;
 }
