@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan({"fi.miolfo.rss.service", "fi.miolfo.rss.controller", "fi.miolfo.rss.mapper"})
+@ComponentScan({"fi.miolfo.rss.service", "fi.miolfo.rss.controller", "fi.miolfo.rss.mapper", "fi.miolfo.rss.repository"})
 public class RssBackendApplication {
 
     public static void main(String[] args) {

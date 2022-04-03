@@ -8,5 +8,10 @@ WIP: Simple descriptions of application endpoints
 Single feed can consist of multiple rss channels. Create new feed with
 
 POST /api/v1/feed - create new feed  
-GET /api/v1/feed/:feedId - get items from feed  
+GET /api/v1/feed/:feedId - get feed info
 POST /api/v1/feed/:feedId - add rss to feed
+GET /api/v1/feed/:feedId/items - get feed items
+DELETE /api/v1/feed/:feedId - delete feed
+
+
+
