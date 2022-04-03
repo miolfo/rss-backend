@@ -2,6 +2,7 @@ package fi.miolfo.rss.service.impl;
 
 import fi.miolfo.rss.model.persistence.Feed;
 import fi.miolfo.rss.repository.FeedRepository;
+import fi.miolfo.rss.repository.FeedSourceRepository;
 import fi.miolfo.rss.service.FeedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ public class FeedServiceImpl implements FeedService {
     @Autowired
     private FeedRepository feedRepository;
 
+    @Autowired
+    private FeedSourceRepository feedSourceRepository;
+
     @Override
     public Optional<Feed> getFeed(int id) {
         return feedRepository.findById(id);
@@ -27,6 +31,7 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     public void deleteFeed(Feed feed) {
+        feedSourceRepository.deleteAll(feed.getFeedSources());
         feedRepository.delete(feed);
     }
 
