@@ -1,9 +1,12 @@
 package fi.miolfo.rss.controller;
 
+import fi.miolfo.rss.exception.FeedNotFoundException;
 import fi.miolfo.rss.model.FeedItem;
 import fi.miolfo.rss.model.persistence.Feed;
 import fi.miolfo.rss.service.FeedService;
 import fi.miolfo.rss.service.RssService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,12 +26,28 @@ public class FeedController {
     @Autowired
     private FeedService feedService;
 
+    private static final Logger log = LoggerFactory.getLogger(FeedController.class);
+
+    @GetMapping(
+            value = "/{id}/refresh"
+    )
+    public ResponseEntity refreshFeedItems(@PathVariable int id) {
+        try {
+            rssService.refreshFeedItems(id);
+        } catch (FeedNotFoundException e) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity(HttpStatus.ACCEPTED);
+    }
+
+    /*
     @GetMapping(
             value = "/items",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<List<FeedItem>> getFeedItems() {
-        return rssService.getFeed();
+        
     }
+    */
 
     @PostMapping(
             value="/",
