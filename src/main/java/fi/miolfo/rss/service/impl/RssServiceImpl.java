@@ -44,6 +44,9 @@ public class RssServiceImpl implements RssService {
     @Autowired
     private WebClient rssWebClient;
 
+    @Autowired
+    private XmlMapper rssXmlMapper;
+
     @Override
     public void refreshFeedItems(int feedId) throws FeedNotFoundException {
 
@@ -75,14 +78,8 @@ public class RssServiceImpl implements RssService {
 
     private Optional<RssRoot> readToRssRoot(String xml) {
 
-        XmlMapper xmlMapper = new XmlMapper();
         try {
-            JavaTimeModule module = new JavaTimeModule();
-            LocalDateTimeDeserializer localDateTimeDeserializer =  new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm:ss Z"));
-            module.addDeserializer(LocalDateTime.class, localDateTimeDeserializer);
-            xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-            xmlMapper.registerModule(module);
-            RssRoot root = xmlMapper.readValue(xml, RssRoot.class);
+            RssRoot root = rssXmlMapper.readValue(xml, RssRoot.class);
             return Optional.of(root);
         } catch (JsonProcessingException e) {
             log.error("Error processing json", e);
