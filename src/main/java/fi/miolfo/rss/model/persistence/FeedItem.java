@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
 @Table
 @Getter
 @Setter
-public class FeedSource {
+public class FeedItem {
 
     @Id
     @Column
@@ -19,17 +19,19 @@ public class FeedSource {
     private int id;
 
     @Column
-    private String name;
+    private String title;
 
     @Column
-    private String source;
+    private String description;
+
+    @Column
+    private String link;
+
+    @Column
+    private LocalDateTime pubDate;
 
     @ManyToOne
-    @JoinColumn(name="feed_id")
+    @JoinColumn(name="feed_source_id")
     @JsonIgnore
-    private Feed feed;
-
-    @OneToMany(mappedBy = "feedSource")
-    @JsonIgnore
-    private List<FeedItem> feedItems;
+    private FeedSource feedSource;
 }

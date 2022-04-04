@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class FeedItem {
+public class FeedItemDto {
 
     private String title;
     private String description;

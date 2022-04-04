@@ -1,5 +1,6 @@
 package fi.miolfo.rss.model.xml;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlCData;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @JacksonXmlRootElement
@@ -36,5 +38,11 @@ public class RssRoot {
         private String link;
         private String title;
         private String description;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "EEE, d MMM yyyy HH:mm:ss Z")
+        private LocalDateTime pubDate;
+        @JacksonXmlProperty(localName = "category")
+        @JacksonXmlCData
+        @JacksonXmlElementWrapper(useWrapping = false)
+        private List<String> categories;
     }
 }

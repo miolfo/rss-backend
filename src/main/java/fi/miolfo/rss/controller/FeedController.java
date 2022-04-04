@@ -1,7 +1,6 @@
 package fi.miolfo.rss.controller;
 
 import fi.miolfo.rss.exception.FeedNotFoundException;
-import fi.miolfo.rss.model.FeedItem;
 import fi.miolfo.rss.model.persistence.Feed;
 import fi.miolfo.rss.service.FeedService;
 import fi.miolfo.rss.service.RssService;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -45,7 +43,7 @@ public class FeedController {
             value = "/items",
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<List<FeedItem>> getFeedItems() {
-        
+
     }
     */
 

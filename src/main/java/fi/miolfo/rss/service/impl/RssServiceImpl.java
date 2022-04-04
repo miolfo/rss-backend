@@ -3,9 +3,12 @@ package fi.miolfo.rss.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import fi.miolfo.rss.exception.FeedNotFoundException;
 import fi.miolfo.rss.mapper.RssToFeedItemMapper;
-import fi.miolfo.rss.model.FeedItem;
+import fi.miolfo.rss.model.persistence.Feed;
+import fi.miolfo.rss.model.persistence.FeedSource;
 import fi.miolfo.rss.model.xml.RssRoot;
 import fi.miolfo.rss.service.FeedService;
 import fi.miolfo.rss.service.FeedSourceService;
@@ -17,16 +20,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class RssServiceImpl implements RssService {
-
-    private static final String HS_XML = "https://www.hs.fi/rss/tuoreimmat.xml";
 
     private static final Logger log = LoggerFactory.getLogger(RssServiceImpl.class);
 
@@ -52,8 +54,12 @@ public class RssServiceImpl implements RssService {
         }
         log.info("Starting refresh on feed " + feedId);
         final var sources = feedOpt.get().getFeedSources();
-        final var monos = sources.stream().map(it -> getFeed(it.getSource())).collect(Collectors.toList());
-        Flux.merge(monos).subscribe(this::handleRss);
+        final var monos =
+                sources.stream()
+                        .map(source -> getFeed(source.getSource())
+                                .map(rssRoot -> Tuples.of(source, rssRoot)))
+                        .collect(Collectors.toList());
+        Flux.merge(monos).subscribe(tuple -> handleRss(tuple.getT2(), feedOpt.get(), tuple.getT1()));
     }
 
     @Override
@@ -63,14 +69,19 @@ public class RssServiceImpl implements RssService {
         return spec.exchangeToMono(res -> res.bodyToMono(String.class).map(this::readToRssRoot));
     }
 
-    private void handleRss(Optional<RssRoot> rssRoot) {
+    private void handleRss(Optional<RssRoot> rssRoot, Feed feed, FeedSource feedSource) {
         log.info("fetched something");
     }
 
     private Optional<RssRoot> readToRssRoot(String xml) {
+
         XmlMapper xmlMapper = new XmlMapper();
         try {
+            JavaTimeModule module = new JavaTimeModule();
+            LocalDateTimeDeserializer localDateTimeDeserializer =  new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm:ss Z"));
+            module.addDeserializer(LocalDateTime.class, localDateTimeDeserializer);
             xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            xmlMapper.registerModule(module);
             RssRoot root = xmlMapper.readValue(xml, RssRoot.class);
             return Optional.of(root);
         } catch (JsonProcessingException e) {
