@@ -8,8 +8,10 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import fi.miolfo.rss.exception.FeedNotFoundException;
 import fi.miolfo.rss.mapper.RssToFeedItemMapper;
 import fi.miolfo.rss.model.persistence.Feed;
+import fi.miolfo.rss.model.persistence.FeedItem;
 import fi.miolfo.rss.model.persistence.FeedSource;
 import fi.miolfo.rss.model.xml.RssRoot;
+import fi.miolfo.rss.repository.FeedItemRepository;
 import fi.miolfo.rss.service.FeedService;
 import fi.miolfo.rss.service.FeedSourceService;
 import fi.miolfo.rss.service.RssService;
@@ -24,6 +26,7 @@ import reactor.util.function.Tuples;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,6 +40,9 @@ public class RssServiceImpl implements RssService {
 
     @Autowired
     private FeedSourceService feedSourceService;
+
+    @Autowired
+    private FeedItemRepository feedItemRepository;
 
     @Autowired
     private RssToFeedItemMapper rssToFeedItemMapper;
@@ -73,7 +79,12 @@ public class RssServiceImpl implements RssService {
     }
 
     private void handleRss(Optional<RssRoot> rssRoot, Feed feed, FeedSource feedSource) {
-        log.info("fetched something");
+
+        if(rssRoot.isPresent()) {
+            List<FeedItem> feedItems = rssRoot.get().getChannel().getItems().stream()
+                    .map(item -> rssToFeedItemMapper.rssItemToFeedItem(item, feedSource)).toList();
+            feedItemRepository.saveAll(feedItems);
+        }
     }
 
     private Optional<RssRoot> readToRssRoot(String xml) {

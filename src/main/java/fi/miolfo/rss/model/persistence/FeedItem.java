@@ -1,8 +1,8 @@
 package fi.miolfo.rss.model.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 @Table
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class FeedItem {
 
     @Id
