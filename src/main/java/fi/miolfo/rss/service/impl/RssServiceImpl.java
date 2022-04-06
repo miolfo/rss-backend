@@ -83,7 +83,12 @@ public class RssServiceImpl implements RssService {
         if(rssRoot.isPresent()) {
             List<FeedItem> feedItems = rssRoot.get().getChannel().getItems().stream()
                     .map(item -> rssToFeedItemMapper.rssItemToFeedItem(item, feedSource)).toList();
-            feedItemRepository.saveAll(feedItems);
+            feedItems.forEach(feedItem -> {
+                Optional<FeedItem> existing = feedItemRepository.findByGuid(feedItem.getGuid());
+                if(existing.isEmpty()) {
+                    feedItemRepository.save(feedItem);
+                }
+            });
         }
     }
 

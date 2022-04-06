@@ -24,6 +24,7 @@ public class RssToFeedItemMapper {
                 .pubDate(item.getPubDate())
                 .link(item.getLink())
                 .feedSource(feedSource)
+                .guid(item.getGuid())
                 .build();
     }
 }

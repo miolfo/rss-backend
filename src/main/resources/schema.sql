@@ -16,5 +16,7 @@ CREATE TABLE Feed_Item(
     link VARCHAR(2048),
     title LONGTEXT,
     description LONGTEXT,
-    pub_date DATETIME
+    pub_date DATETIME,
+    guid VARCHAR(2048),
+    UNIQUE(guid)
 );

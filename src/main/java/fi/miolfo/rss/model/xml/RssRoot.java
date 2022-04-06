@@ -38,6 +38,7 @@ public class RssRoot {
         private String link;
         private String title;
         private String description;
+        private String guid;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "EEE, d MMM yyyy HH:mm:ss Z")
         private LocalDateTime pubDate;
         @JacksonXmlProperty(localName = "category")

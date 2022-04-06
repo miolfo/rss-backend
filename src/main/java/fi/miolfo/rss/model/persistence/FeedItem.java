@@ -30,6 +30,9 @@ public class FeedItem {
     @Column
     private String link;
 
+    @Column(unique = true)
+    private String guid;
+
     @Column
     private LocalDateTime pubDate;
 
