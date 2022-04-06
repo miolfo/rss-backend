@@ -2,6 +2,7 @@ package fi.miolfo.rss.service.impl;
 
 import fi.miolfo.rss.model.persistence.Feed;
 import fi.miolfo.rss.model.persistence.FeedSource;
+import fi.miolfo.rss.repository.FeedItemRepository;
 import fi.miolfo.rss.repository.FeedRepository;
 import fi.miolfo.rss.repository.FeedSourceRepository;
 import fi.miolfo.rss.service.FeedSourceService;
@@ -20,6 +21,9 @@ public class FeedSourceServiceImpl implements FeedSourceService {
     @Autowired
     private FeedSourceRepository feedSourceRepository;
 
+    @Autowired
+    private FeedItemRepository feedItemRepository;
+
     @Override
     public Optional<FeedSource> updateFeedSource(int feedId, FeedSource feedSource) {
         final var feed = feedRepository.findById(feedId);
@@ -37,6 +41,7 @@ public class FeedSourceServiceImpl implements FeedSourceService {
 
     @Override
     public void deleteFeedSource(FeedSource feedSource) {
+        feedItemRepository.deleteAll(feedSource.getFeedItems());
         feedSourceRepository.delete(feedSource);
     }
 
