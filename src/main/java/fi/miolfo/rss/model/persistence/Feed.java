@@ -1,5 +1,6 @@
 package fi.miolfo.rss.model.persistence;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import fi.miolfo.rss.model.UpdateStatus;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class Feed {
     private String name;
 
     @Column
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastUpdated;
 
     @OneToMany(mappedBy = "feed")

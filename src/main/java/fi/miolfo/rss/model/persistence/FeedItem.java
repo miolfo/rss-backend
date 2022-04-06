@@ -1,5 +1,6 @@
 package fi.miolfo.rss.model.persistence;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -34,6 +35,7 @@ public class FeedItem {
     private String guid;
 
     @Column
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime pubDate;
 
     @ManyToOne
