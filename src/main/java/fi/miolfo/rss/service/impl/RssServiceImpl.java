@@ -7,11 +7,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import fi.miolfo.rss.exception.FeedNotFoundException;
 import fi.miolfo.rss.mapper.RssToFeedItemMapper;
+import fi.miolfo.rss.model.UpdateStatus;
 import fi.miolfo.rss.model.persistence.Feed;
 import fi.miolfo.rss.model.persistence.FeedItem;
 import fi.miolfo.rss.model.persistence.FeedSource;
 import fi.miolfo.rss.model.xml.RssRoot;
 import fi.miolfo.rss.repository.FeedItemRepository;
+import fi.miolfo.rss.repository.FeedRepository;
+import fi.miolfo.rss.repository.FeedSourceRepository;
 import fi.miolfo.rss.service.FeedService;
 import fi.miolfo.rss.service.FeedSourceService;
 import fi.miolfo.rss.service.RssService;
@@ -45,6 +48,12 @@ public class RssServiceImpl implements RssService {
     private FeedItemRepository feedItemRepository;
 
     @Autowired
+    private FeedSourceRepository feedSourceRepository;
+
+    @Autowired
+    private FeedRepository feedRepository;
+
+    @Autowired
     private RssToFeedItemMapper rssToFeedItemMapper;
 
     @Autowired
@@ -57,10 +66,13 @@ public class RssServiceImpl implements RssService {
     public void refreshFeedItems(int feedId) throws FeedNotFoundException {
 
         final var feedOpt = feedService.getFeed(feedId);
+
         if(feedOpt.isEmpty()) {
+
             log.error("Unable to refresh non existing feed " + feedId);
             throw new FeedNotFoundException();
         }
+
         log.info("Starting refresh on feed " + feedId);
         final var sources = feedOpt.get().getFeedSources();
         final var monos =
@@ -80,7 +92,10 @@ public class RssServiceImpl implements RssService {
 
     private void handleRss(Optional<RssRoot> rssRoot, Feed feed, FeedSource feedSource) {
 
+        final LocalDateTime now = LocalDateTime.now();
+
         if(rssRoot.isPresent()) {
+
             List<FeedItem> feedItems = rssRoot.get().getChannel().getItems().stream()
                     .map(item -> rssToFeedItemMapper.rssItemToFeedItem(item, feedSource)).toList();
             feedItems.forEach(feedItem -> {
@@ -89,7 +104,17 @@ public class RssServiceImpl implements RssService {
                     feedItemRepository.save(feedItem);
                 }
             });
+
+            feed.setLastUpdated(now);
+            feedSource.setLastUpdated(now);
+            feedSource.setUpdateStatus(UpdateStatus.SUCCESS);
+        } else {
+
+            log.warn("Rss object was not parsed, check logs for error, feed source " + feedSource.getId());
+            feedSource.setUpdateStatus(UpdateStatus.FAIL);
         }
+        feedSourceRepository.save(feedSource);
+        feedRepository.save(feed);
     }
 
     private Optional<RssRoot> readToRssRoot(String xml) {

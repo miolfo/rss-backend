@@ -1,10 +1,12 @@
 package fi.miolfo.rss.model.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import fi.miolfo.rss.model.UpdateStatus;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -20,6 +22,9 @@ public class Feed {
 
     @Column
     private String name;
+
+    @Column
+    private LocalDateTime lastUpdated;
 
     @OneToMany(mappedBy = "feed")
     @JsonIgnore

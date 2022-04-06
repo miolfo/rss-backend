@@ -1,13 +1,16 @@
 CREATE TABLE Feed(
      id INT AUTO_INCREMENT PRIMARY KEY,
-     name VARCHAR(128)
+     name VARCHAR(128),
+     last_updated DATETIME
 );
 
 CREATE TABLE Feed_Source(
    id INT AUTO_INCREMENT PRIMARY KEY,
    feed_id int,
    name VARCHAR(128),
-   source VARCHAR(2048)
+   source VARCHAR(2048),
+   last_updated DATETIME,
+   update_status INT
 );
 
 CREATE TABLE Feed_Item(
