@@ -1,6 +1,7 @@
 package fi.miolfo.rss.controller;
 
 import fi.miolfo.rss.exception.FeedNotFoundException;
+import fi.miolfo.rss.model.FeedItemDto;
 import fi.miolfo.rss.model.persistence.Feed;
 import fi.miolfo.rss.service.FeedService;
 import fi.miolfo.rss.service.RssService;
@@ -11,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -38,14 +41,20 @@ public class FeedController {
         return new ResponseEntity(HttpStatus.ACCEPTED);
     }
 
-    /*
     @GetMapping(
-            value = "/items",
+            value = "/{id}/items",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<List<FeedItem>> getFeedItems() {
+    public ResponseEntity<List<FeedItemDto>> getFeedItems(
+            @PathVariable int id,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "25") int count) {
+        final var feed = feedService.getFeed(id);
+        if(feed.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
+        return ResponseEntity.ok(feedService.getFeedItems(feed.get(), page, count));
     }
-    */
 
     @PostMapping(
             value="/",

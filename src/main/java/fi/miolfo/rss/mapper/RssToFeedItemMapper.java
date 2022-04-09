@@ -9,14 +9,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class RssToFeedItemMapper {
 
-    /*public FeedItemDto itemToFeedItem(RssRoot.Item item) {
-        return FeedItemDto.builder()
-                .description(item.getDescription())
-                .link(item.getLink())
-                .title(item.getTitle())
-                .build();
-    }*/
-
     public FeedItem rssItemToFeedItem(RssRoot.Item item, FeedSource feedSource) {
         return FeedItem.builder()
                 .description(item.getDescription())
