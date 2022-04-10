@@ -2,7 +2,6 @@ package fi.miolfo.rss.model.persistence;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import fi.miolfo.rss.model.UpdateStatus;
 import lombok.Getter;
 import lombok.Setter;
 

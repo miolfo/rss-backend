@@ -61,9 +61,9 @@ public class FeedController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public Feed createFeed(@RequestBody Feed feed) {
+    public ResponseEntity<Feed> createFeed(@RequestBody Feed feed) {
 
-        return feedService.save(feed);
+        return ResponseEntity.ok(feedService.save(feed));
     }
 
     @GetMapping(
@@ -108,7 +108,7 @@ public class FeedController {
             value = "/",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public List<Feed> getFeeds() {
-        return feedService.getFeeds();
+    public ResponseEntity<List<Feed>> getFeeds() {
+        return ResponseEntity.ok(feedService.getFeeds());
     }
 }
