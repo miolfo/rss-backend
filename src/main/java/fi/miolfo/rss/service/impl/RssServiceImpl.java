@@ -20,6 +20,7 @@ import fi.miolfo.rss.service.RssService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -88,7 +89,14 @@ public class RssServiceImpl implements RssService {
     @Override
     public Mono<Optional<RssRoot>> getFeed(String url) {
         var spec = rssWebClient.get().uri(url);
-        return spec.exchangeToMono(res -> res.bodyToMono(String.class).map(this::readToRssRoot));
+        return spec.exchangeToMono(res -> {
+            if(res.statusCode() == HttpStatus.OK) {
+                return res.bodyToMono(String.class).map(this::readToRssRoot);
+            } else {
+                log.warn("Unexpected status code " + res.statusCode() + " from url " + url);
+                return Mono.just(Optional.empty());
+            }
+        });
     }
 
     private void handleRss(Optional<RssRoot> rssRoot, Feed feed, FeedSource feedSource) {
