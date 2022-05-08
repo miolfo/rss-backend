@@ -1,16 +1,15 @@
 package fi.miolfo.rss.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import fi.miolfo.rss.exception.FeedNotFoundException;
+import fi.miolfo.rss.mapper.AtomRootToRssRootMapper;
 import fi.miolfo.rss.mapper.RssToFeedItemMapper;
 import fi.miolfo.rss.model.UpdateStatus;
 import fi.miolfo.rss.model.persistence.Feed;
 import fi.miolfo.rss.model.persistence.FeedItem;
 import fi.miolfo.rss.model.persistence.FeedSource;
+import fi.miolfo.rss.model.xml.AtomRoot;
 import fi.miolfo.rss.model.xml.RssRoot;
 import fi.miolfo.rss.repository.FeedItemRepository;
 import fi.miolfo.rss.repository.FeedRepository;
@@ -28,9 +27,9 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,6 +61,9 @@ public class RssServiceImpl implements RssService {
     @Autowired
     private XmlMapper rssXmlMapper;
 
+    @Autowired
+    private AtomRootToRssRootMapper atomRootToRssRootMapper;
+
     @Override
     public void refreshFeedItems(int feedId) throws FeedNotFoundException {
 
@@ -85,7 +87,6 @@ public class RssServiceImpl implements RssService {
 
     @Override
     public Mono<Optional<RssRoot>> getFeed(String url) {
-
         var spec = rssWebClient.get().uri(url);
         return spec.exchangeToMono(res -> res.bodyToMono(String.class).map(this::readToRssRoot));
     }
@@ -94,13 +95,15 @@ public class RssServiceImpl implements RssService {
 
         final LocalDateTime now = LocalDateTime.now();
 
-        if(rssRoot.isPresent()) {
+        if(rssRoot.isPresent() && rssRoot.get().getChannel() != null) {
 
+            AtomicInteger addedCount = new AtomicInteger();
             List<FeedItem> feedItems = rssRoot.get().getChannel().getItems().stream()
                     .map(item -> rssToFeedItemMapper.rssItemToFeedItem(item, feedSource)).toList();
             feedItems.forEach(feedItem -> {
                 Optional<FeedItem> existing = feedItemRepository.findByGuid(feedItem.getGuid());
                 if(existing.isEmpty()) {
+                    addedCount.getAndIncrement();
                     feedItemRepository.save(feedItem);
                 }
             });
@@ -108,6 +111,7 @@ public class RssServiceImpl implements RssService {
             feed.setLastUpdated(now);
             feedSource.setLastUpdated(now);
             feedSource.setUpdateStatus(UpdateStatus.SUCCESS);
+            log.info("Updated feed " + feed.getId() + " with " + addedCount + " items");
         } else {
 
             log.warn("Rss object was not parsed, check logs for error, feed source " + feedSource.getId());
@@ -120,11 +124,26 @@ public class RssServiceImpl implements RssService {
     private Optional<RssRoot> readToRssRoot(String xml) {
 
         try {
-            RssRoot root = rssXmlMapper.readValue(xml, RssRoot.class);
-            return Optional.of(root);
+            if(isAtom(xml)) {
+                return Optional.of(readAtomToRssRoot(xml));
+            } else {
+                RssRoot root = rssXmlMapper.readValue(xml, RssRoot.class);
+                return Optional.of(root);
+            }
         } catch (JsonProcessingException e) {
             log.error("Error processing json", e);
             return Optional.empty();
         }
+    }
+
+    private RssRoot readAtomToRssRoot(String xml) throws JsonProcessingException {
+        AtomRoot root = rssXmlMapper.readValue(xml, AtomRoot.class);
+        return atomRootToRssRootMapper.atomRootToRssRoot(root);
+    }
+
+    private boolean isAtom(String xml) {
+        //TODO: Actually parse into an object instead of doing this hacky method
+        final String ATOM_STRING = "xmlns=\"http://www.w3.org/2005/Atom\"";
+        return xml.contains(ATOM_STRING);
     }
 }
