@@ -10,5 +10,7 @@ public interface RssService {
 
     public void refreshFeedItems(int feedId) throws FeedNotFoundException;
 
+    public Mono<Boolean> checkValidRssUrl(String url);
+
     public Mono<Optional<RssRoot>> getFeed(String url);
 }

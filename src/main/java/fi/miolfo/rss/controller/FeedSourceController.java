@@ -1,13 +1,16 @@
 package fi.miolfo.rss.controller;
 
+import fi.miolfo.rss.model.CheckUrlDto;
 import fi.miolfo.rss.model.persistence.FeedSource;
 import fi.miolfo.rss.service.FeedSourceService;
+import fi.miolfo.rss.service.RssService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -17,6 +20,19 @@ public class FeedSourceController {
 
     @Autowired
     private FeedSourceService feedSourceService;
+
+    @Autowired
+    private RssService rssService;
+
+    @PostMapping(
+            value = "/check-url",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<Boolean>> checkValidRssUrl(@RequestBody CheckUrlDto urlDto) {
+
+        return rssService.checkValidRssUrl(urlDto.url())
+                .map(ResponseEntity::ok);
+    }
 
     @GetMapping(
             value = "/{feedId}/source",

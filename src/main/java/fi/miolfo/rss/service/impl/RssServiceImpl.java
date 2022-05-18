@@ -99,6 +99,20 @@ public class RssServiceImpl implements RssService {
         });
     }
 
+    @Override
+    public Mono<Boolean> checkValidRssUrl(String url) {
+
+        var spec = rssWebClient.get().uri(url);
+        return spec.exchangeToMono(res -> {
+            if(res.statusCode() == HttpStatus.OK) {
+                return res.bodyToMono(String.class).map(this::readToRssRoot).map(Optional::isPresent);
+            } else {
+                log.warn("Unexpected status code " + res.statusCode() + " from url " + url);
+                return Mono.just(false);
+            }
+        });
+    }
+
     private void handleRss(Optional<RssRoot> rssRoot, Feed feed, FeedSource feedSource) {
 
         final LocalDateTime now = LocalDateTime.now();
