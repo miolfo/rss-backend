@@ -27,6 +27,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +67,7 @@ public class RssServiceImpl implements RssService {
     private AtomRootToRssRootMapper atomRootToRssRootMapper;
 
     @Override
+    @Transactional
     public void refreshFeedItems(int feedId) throws FeedNotFoundException {
 
         final var feedOpt = feedService.getFeed(feedId);
@@ -78,6 +80,11 @@ public class RssServiceImpl implements RssService {
 
         log.info("Starting refresh on feed " + feedId);
         final var sources = feedOpt.get().getFeedSources();
+
+        if(sources.size() == 0) {
+            log.info("No sources for feed " + feedId);
+            return;
+        }
         final var monos =
                 sources.stream()
                         .map(source -> getFeed(source.getSource())
@@ -133,7 +140,7 @@ public class RssServiceImpl implements RssService {
             feed.setLastUpdated(now);
             feedSource.setLastUpdated(now);
             feedSource.setUpdateStatus(UpdateStatus.SUCCESS);
-            log.info("Updated feed " + feed.getId() + " with " + addedCount + " items");
+            log.info("Updated feed " + feed.getId() + " with " + addedCount + " items, from source " + feedSource.getSource());
         } else {
 
             log.warn("Rss object was not parsed, check logs for error, feed source " + feedSource.getId());

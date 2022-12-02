@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Import;
         "fi.miolfo.rss.controller",
         "fi.miolfo.rss.mapper",
         "fi.miolfo.rss.repository",
-        "fi.miolfo.rss.filter"})
+        "fi.miolfo.rss.filter",
+        "fi.miolfo.rss.job"})
 @Import({WebClientConfiguration.class, XmlMapperConfiguration.class})
 public class RssBackendApplication {
 
